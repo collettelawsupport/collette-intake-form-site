@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Collette Law Client Intake Form</title>
+  <style>
+    :root { --primary:#1f4e79; --border:#d7dee8; --bg:#f6f8fb; --danger:#b00020; --ok:#0b6b3a; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial, sans-serif; background:var(--bg); color:#17212b; }
+    .wrap { max-width:1040px; margin:0 auto; padding:24px; }
+    header { background:#fff; border-bottom:1px solid var(--border); }
+    .brand { display:flex; gap:16px; align-items:center; }
+    .brand h1 { margin:0; font-size:26px; color:var(--primary); }
+    .brand p { margin:4px 0 0; color:#52606d; }
+    .logo { width:72px; height:72px; object-fit:contain; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:20px; margin-top:20px; box-shadow:0 2px 10px rgba(0,0,0,.04); }
+    .top-actions { display:grid; grid-template-columns:1fr 1.5fr; gap:18px; align-items:stretch; }
+    a.button, button { display:inline-flex; align-items:center; justify-content:center; min-height:42px; border-radius:9px; border:0; padding:10px 16px; background:var(--primary); color:#fff; text-decoration:none; cursor:pointer; font-weight:700; }
+    button.secondary { background:#eef4fa; color:var(--primary); border:1px solid #c9d8e6; }
+    .dropzone { border:2px dashed #9eb5ca; border-radius:12px; padding:20px; text-align:center; background:#fbfdff; transition:.15s; }
+    .dropzone.dragover { background:#eaf2f8; border-color:var(--primary); }
+    .dropzone strong { color:var(--primary); }
+    .muted { color:#657484; font-size:14px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    label { display:block; font-weight:700; margin-bottom:6px; }
+    input, textarea, select { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px; font:inherit; background:#fff; }
+    textarea { min-height:110px; resize:vertical; }
+    fieldset { border:1px solid var(--border); border-radius:12px; padding:14px; margin:16px 0; }
+    legend { font-weight:800; color:var(--primary); padding:0 6px; }
+    .checks { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .checks label { font-weight:400; display:flex; gap:8px; align-items:center; }
+    .checks input { width:auto; }
+    .signature-pad { border:1px solid var(--border); border-radius:10px; width:100%; height:170px; background:#fff; touch-action:none; }
+    .signature-methods { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; }
+    .signature-methods label { display:flex; align-items:center; gap:8px; margin:0; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:#fbfdff; cursor:pointer; }
+    .signature-methods input { width:auto; }
+    .signature-panel.hidden { display:none; }
+    .typed-signature-preview { min-height:86px; display:flex; align-items:center; padding:12px 16px; margin-top:12px; border:1px solid var(--border); border-radius:10px; background:#fff; color:#17212b; font-family:"Brush Script MT","Segoe Script",cursive; font-size:36px; line-height:1.2; overflow-wrap:anywhere; }
+    .typed-signature-preview.empty { color:#9aa6b2; font-family:Arial,sans-serif; font-size:15px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:18px; }
+    .status { margin-top:12px; padding:12px; border-radius:8px; display:none; }
+    .status.ok { display:block; background:#eaf7ef; color:var(--ok); border:1px solid #b9e3c8; }
+    .status.err { display:block; background:#fdecef; color:var(--danger); border:1px solid #f3bdc7; }
+    .full { grid-column:1 / -1; }
+    .child-entry { border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:12px; background:#fbfdff; }
+    .child-entry-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .child-entry-title { font-weight:800; color:var(--primary); }
+    .remove-child { min-height:34px; padding:6px 10px; background:#fff; color:var(--danger); border:1px solid #f3bdc7; }
+    .child-actions-top { margin-top:8px; margin-bottom:14px; }
+    .child-actions-bottom { margin-top:6px; }
+    .add-child-button { font-size:15px; }
+    @media (max-width:760px){ .top-actions,.grid,.checks{grid-template-columns:1fr;} .brand{align-items:flex-start;} }
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap brand">
+    <img class="logo" src="collette-law-logo.png" alt="Collette Law logo" onerror="this.style.display='none'" />
+    <div><h1>Collette Law Client Intake Form</h1><p>Complete the form online or download the blank Word form and upload the completed copy.</p></div>
+  </div>
+</header>
+<main class="wrap">
+  <section class="card top-actions">
+    <div>
+      <h2>Manual option</h2>
+      <p class="muted">Download the blank Word form, complete it, then drag and drop the finished DOCX or PDF here.</p>
+      <a class="button" href="ClientIntakeForm_Blank_Download.docx" download>Download blank form</a>
+    </div>
+    <div>
+      <h2>Upload completed form</h2>
+      <div class="grid" style="margin-bottom:14px">
+        <div><label for="manualClientName">Client Name *</label><input id="manualClientName" name="manualClientName" /></div>
+        <div><label for="manualMatterType">Matter Type *</label><select id="manualMatterType" name="manualMatterType">
+          <option value="">Select matter type</option>
+          <option>Divorce with Children</option>
+          <option>Divorce without Children</option>
+          <option>Modification of Current Order</option>
+          <option>Child Support</option>
+          <option>Visitation</option>
+          <option>Conservatorship</option>
+          <option>Relinquishment</option>
+          <option>Adoption</option>
+          <option>Probate</option>
+          <option>Estate Planning</option>
+          <option>Personal Injury</option>
+          <option>Civil Litigation</option>
+          <option>Intake</option>
+        </select></div>
+      </div>
+      <div id="dropzone" class="dropzone">
+        <strong>Drag and drop completed file here</strong><br />
+        <span class="muted">DOCX or PDF only. Click here only as a fallback.</span>
+        <input id="manualFile" type="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden />
+        <p id="fileName" class="muted"></p>
+      </div>
+      <div class="actions"><button id="submitUpload" type="button">Submit Uploaded Form</button></div>
+      <div id="uploadStatus" class="status"></div>
+    </div>
+  </section>
+
+  <form id="intakeForm" class="card">
+    <h2>Online Intake Form</h2>
+    <fieldset><legend>Client Information</legend><div class="grid">
+      <div><label for="date">Date *</label><input id="date" name="date" type="date" required /></div>
+      <div><label for="clientName">Full Name *</label><input id="clientName" name="clientName" required /></div>
+      <div class="full"><label for="clientAddress">Address *</label><input id="clientAddress" name="clientAddress" required /></div>
+      <div><label for="clientState">State *</label><input id="clientState" name="clientState" required /></div>
+      <div><label for="clientZip">Zip *</label><input id="clientZip" name="clientZip" required /></div>
+      <div><label for="clientCounty">County</label><input id="clientCounty" name="clientCounty" /></div>
+      <div><label for="residenceLength">How long at address</label><input id="residenceLength" name="residenceLength" /></div>
+      <div><label for="clientDob">Date of Birth</label><input id="clientDob" name="clientDob" type="date" /></div>
+      <div><label for="clientDlLast3">Last 3 Digits of Driver License</label><input id="clientDlLast3" name="clientDlLast3" maxlength="3" /></div>
+      <div><label for="clientSsnLast3">Last 3 Digits of SSN</label><input id="clientSsnLast3" name="clientSsnLast3" maxlength="3" /></div>
+      <div><label for="clientPhone">Phone *</label><input id="clientPhone" name="clientPhone" type="tel" required /></div>
+      <div><label for="clientEmail">Email *</label><input id="clientEmail" name="clientEmail" type="email" required /></div>
+    </div></fieldset>
+
+    <fieldset><legend>Employment and Marriage Information</legend><div class="grid">
+      <div><label for="employer">Employer</label><input id="employer" name="employer" /></div>
+      <div><label for="employerPhone">Employer Phone</label><input id="employerPhone" name="employerPhone" /></div>
+      <div class="full"><label for="employerAddress">Employer Address</label><input id="employerAddress" name="employerAddress" /></div>
+      <div><label for="monthlyIncome">Monthly Income</label><input id="monthlyIncome" name="monthlyIncome" type="number" step="0.01" /></div>
+      <div><label for="dateOfMarriage">Date of Marriage</label><input id="dateOfMarriage" name="dateOfMarriage" type="date" /></div>
+      <div><label for="dateCeasedLivingTogether">Date ceased to live together</label><input id="dateCeasedLivingTogether" name="dateCeasedLivingTogether" type="date" /></div>
+      <div><label for="marriageCityState">City and State of Marriage</label><input id="marriageCityState" name="marriageCityState" /></div>
+      <div><label for="maidenName">Maiden Name</label><input id="maidenName" name="maidenName" /></div>
+    </div></fieldset>
+
+    <fieldset><legend>Spouse Information, if family law matter</legend><div class="grid">
+      <div><label for="spouseName">Full Name</label><input id="spouseName" name="spouseName" /></div>
+      <div><label for="spouseCounty">County</label><input id="spouseCounty" name="spouseCounty" /></div>
+      <div class="full"><label for="spouseAddress">Address</label><input id="spouseAddress" name="spouseAddress" /></div>
+      <div><label for="spouseDob">Date of Birth</label><input id="spouseDob" name="spouseDob" type="date" /></div>
+      <div><label for="spouseDlLast3">Last 3 Digits of Driver License</label><input id="spouseDlLast3" name="spouseDlLast3" maxlength="3" /></div>
+      <div><label for="spouseSsnLast3">Last 3 Digits of SSN</label><input id="spouseSsnLast3" name="spouseSsnLast3" maxlength="3" /></div>
+      <div><label for="spousePhone">Phone</label><input id="spousePhone" name="spousePhone" /></div>
+      <div><label for="spouseEmail">Email</label><input id="spouseEmail" name="spouseEmail" type="email" /></div>
+      <div><label for="spouseEmployer">Employer</label><input id="spouseEmployer" name="spouseEmployer" /></div>
+      <div><label for="spouseEmployerStartYear">Start Year</label><input id="spouseEmployerStartYear" name="spouseEmployerStartYear" /></div>
+      <div class="full"><label for="spouseEmployerAddress">Employer Address</label><input id="spouseEmployerAddress" name="spouseEmployerAddress" /></div>
+      <div><label for="spouseEmployerPhone">Employer Phone</label><input id="spouseEmployerPhone" name="spouseEmployerPhone" /></div>
+      <div><label for="spouseMonthlyIncome">Monthly Income</label><input id="spouseMonthlyIncome" name="spouseMonthlyIncome" type="number" step="0.01" /></div>
+    </div></fieldset>
+
+    <fieldset><legend>Children, if family law matter</legend>
+      <p class="muted">Add as many children as are involved in the lawsuit. The first four match the original paper form, and additional children will be included in the generated document payload.</p>
+      <div id="childrenContainer"></div>
+      <div class="actions child-actions-bottom">
+        <button class="secondary add-child-button" id="addChildBottom" type="button">+ Add another child</button>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Description of Legal Issue</legend>
+      <label>Type of Case</label><div class="checks">
+        <label><input type="checkbox" name="caseTypes" value="Divorce with Children" /> Divorce with Children</label>
+        <label><input type="checkbox" name="caseTypes" value="Divorce without Children" /> Divorce without Children</label>
+        <label><input type="checkbox" name="caseTypes" value="Modification of Current Order" /> Modification</label>
+        <label><input type="checkbox" name="caseTypes" value="Child Support" /> Child Support</label>
+        <label><input type="checkbox" name="caseTypes" value="Visitation" /> Visitation</label>
+        <label><input type="checkbox" name="caseTypes" value="Conservatorship" /> Conservatorship</label>
+        <label><input type="checkbox" name="caseTypes" value="Relinquishment" /> Relinquishment</label>
+        <label><input type="checkbox" name="caseTypes" value="Adoption" /> Adoption</label>
+        <label><input type="checkbox" name="caseTypes" value="Probate" /> Probate</label>
+        <label><input type="checkbox" name="caseTypes" value="Estate Planning" /> Estate Planning</label>
+        <label><input type="checkbox" name="caseTypes" value="Personal Injury" /> Personal Injury</label>
+        <label><input type="checkbox" name="caseTypes" value="Civil Litigation" /> Civil Litigation</label>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div><label for="requestingNameChange">Requesting name change?</label><input id="requestingNameChange" name="requestingNameChange" /></div>
+        <div><label for="caseFiled">Has a case been filed?</label><input id="caseFiled" name="caseFiled" /></div>
+        <div><label for="served">Have you been served?</label><input id="served" name="served" /></div>
+        <div><label for="servedWhen">When?</label><input id="servedWhen" name="servedWhen" /></div>
+        <div class="full"><label for="mainLegalIssue">Main Legal Issue *</label><textarea id="mainLegalIssue" name="mainLegalIssue" required></textarea></div>
+        <div class="full"><label for="referralSource">How did you hear about our law firm?</label><input id="referralSource" name="referralSource" /></div>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Notice and Waiver of Conflict of Interest</legend>
+      <p class="muted">I understand that consultation alone does not constitute the formation of an attorney-client relationship and that no attorney-client relationship exists unless and until required payments are made and an Employment Agreement is signed by all required parties.</p>
+      <label>Signature *</label>
+      <div class="signature-methods" role="radiogroup" aria-label="Signature method">
+        <label><input type="radio" name="signatureMethod" value="draw" checked /> Draw signature</label>
+        <label><input type="radio" name="signatureMethod" value="type" /> Type signature</label>
+      </div>
+      <div id="drawSignaturePanel" class="signature-panel">
+        <canvas id="signaturePad" class="signature-pad" aria-label="Draw signature"></canvas>
+        <div class="actions"><button class="secondary" id="clearSignature" type="button">Clear Signature</button></div>
+      </div>
+      <div id="typeSignaturePanel" class="signature-panel hidden">
+        <label for="typedSignature">Typed Signature *</label>
+        <input id="typedSignature" name="typedSignature" autocomplete="name" />
+        <div id="typedSignaturePreview" class="typed-signature-preview empty">Typed signature preview</div>
+      </div>
+      <div class="grid"><div><label for="signatureDate">Signature Date *</label><input id="signatureDate" name="signatureDate" type="date" required /></div></div>
+    </fieldset>
+    <div class="actions"><button type="submit">Submit Online Form</button></div>
+    <div id="formStatus" class="status"></div>
+  </form>
+</main>
+<script>
+  const API_ENDPOINTS = {
+    online: '/api/online-submission',
+    manual: '/api/manual-upload'
+  };
+
+  const byId = id => document.getElementById(id);
+  const setStatus = (el, msg, ok=false) => { el.textContent = msg; el.className = 'status ' + (ok ? 'ok' : 'err'); };
+  const sanitizeFilePart = s => (s || 'Unknown').trim().replace(/[^a-z0-9_-]+/gi, '_').replace(/^_+|_+$/g, '') || 'Unknown';
+  const readResponseMessage = async (res, fallback) => {
+    try {
+      const body = await res.json();
+      return body.message || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  const fileToBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || '').split(',')[1] || '');
+    reader.onerror = () => reject(new Error('Could not read selected file.'));
+    reader.readAsDataURL(file);
+  });
+
+  // Drag/drop upload
+  let selectedFile = null;
+  const dropzone = byId('dropzone');
+  const manualFile = byId('manualFile');
+  dropzone.addEventListener('click', () => manualFile.click());
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+  manualFile.addEventListener('change', e => handleFile(e.target.files[0]));
+  function handleFile(file){
+    if(!file) return;
+    if(!/\.(docx|pdf)$/i.test(file.name)){ setStatus(byId('uploadStatus'), 'Please upload a DOCX or PDF file.'); return; }
+    selectedFile = file; byId('fileName').textContent = 'Selected: ' + file.name;
+    byId('uploadStatus').className = 'status'; byId('uploadStatus').textContent = '';
+  }
+
+  byId('submitUpload').addEventListener('click', async () => {
+    if(!selectedFile){ setStatus(byId('uploadStatus'), 'Please drag and drop a completed DOCX or PDF first.'); return; }
+    const manualClientName = byId('manualClientName').value.trim();
+    const manualMatterType = byId('manualMatterType').value.trim();
+    if(!manualClientName){ setStatus(byId('uploadStatus'), 'Please enter the client name for this upload.'); return; }
+    if(!manualMatterType){ setStatus(byId('uploadStatus'), 'Please select the matter type for this upload.'); return; }
+    try {
+      setStatus(byId('uploadStatus'), 'Uploading...', true);
+      const fileBase64 = await fileToBase64(selectedFile);
+      const res = await fetch(API_ENDPOINTS.manual, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          submissionType: 'manual_upload',
+          timestamp: new Date().toISOString(),
+          clientName: manualClientName,
+          matterType: manualMatterType,
+          uploadedFileName: selectedFile.name,
+          contentType: selectedFile.type,
+          fileBase64
+        })
+      });
+      if(!res.ok) throw new Error(await readResponseMessage(res, 'Upload failed with status ' + res.status));
+      setStatus(byId('uploadStatus'), 'Uploaded successfully.', true);
+    } catch(err) { setStatus(byId('uploadStatus'), err.message); }
+  });
+
+
+  // Children: dynamic add/remove. Power Automate receives child1Name/child1Dob through childNName/childNDob, plus children[] and childrenText.
+  const childrenContainer = byId('childrenContainer');
+  let childCount = 0;
+  function addChild(name = '', dob = '') {
+    childCount += 1;
+    const n = childCount;
+    const entry = document.createElement('div');
+    entry.className = 'child-entry';
+    entry.dataset.childNumber = String(n);
+    entry.innerHTML = `
+      <div class="child-entry-header">
+        <div class="child-entry-title">Child ${n}</div>
+        <button class="remove-child" type="button" aria-label="Remove child ${n}">Remove</button>
+      </div>
+      <div class="grid">
+        <div><label for="child${n}Name">Child ${n} Name</label><input id="child${n}Name" name="child${n}Name" value="${escapeHtml(name)}" /></div>
+        <div><label for="child${n}Dob">Child ${n} Date of Birth</label><input id="child${n}Dob" name="child${n}Dob" type="date" value="${escapeHtml(dob)}" /></div>
+      </div>`;
+    entry.querySelector('.remove-child').addEventListener('click', () => { entry.remove(); renumberChildren(); });
+    childrenContainer.appendChild(entry);
+  }
+  function escapeHtml(s){ return String(s || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+  function renumberChildren(){
+    childCount = 0;
+    [...childrenContainer.querySelectorAll('.child-entry')].forEach(entry => {
+      childCount += 1;
+      const n = childCount;
+      entry.dataset.childNumber = String(n);
+      entry.querySelector('.child-entry-title').textContent = `Child ${n}`;
+      const nameInput = entry.querySelector('input[name$="Name"]');
+      const dobInput = entry.querySelector('input[name$="Dob"]');
+      const nameLabel = entry.querySelector('label[for$="Name"]');
+      const dobLabel = entry.querySelector('label[for$="Dob"]');
+      nameInput.id = nameInput.name = `child${n}Name`;
+      dobInput.id = dobInput.name = `child${n}Dob`;
+      nameLabel.htmlFor = `child${n}Name`; nameLabel.textContent = `Child ${n} Name`;
+      dobLabel.htmlFor = `child${n}Dob`; dobLabel.textContent = `Child ${n} Date of Birth`;
+      entry.querySelector('.remove-child').setAttribute('aria-label', `Remove child ${n}`);
+    });
+  }
+  function collectChildren(fd){
+    const children = [];
+    [...childrenContainer.querySelectorAll('.child-entry')].forEach((entry, idx) => {
+      const n = idx + 1;
+      const name = (fd.get(`child${n}Name`) || '').toString().trim();
+      const dob = (fd.get(`child${n}Dob`) || '').toString().trim();
+      if(name || dob) children.push({ name, dateOfBirth: dob });
+    });
+    return children;
+  }
+  document.querySelectorAll('.add-child-button').forEach(button => {
+    button.addEventListener('click', () => addChild());
+  });
+  for(let i = 0; i < 4; i += 1) addChild();
+
+  // Signature pad
+  const canvas = byId('signaturePad'); const ctx = canvas.getContext('2d'); let drawing = false, signed = false;
+  const drawSignaturePanel = byId('drawSignaturePanel');
+  const typeSignaturePanel = byId('typeSignaturePanel');
+  const typedSignature = byId('typedSignature');
+  const typedSignaturePreview = byId('typedSignaturePreview');
+  function resizeCanvas(){ const r = canvas.getBoundingClientRect(); const data = canvas.toDataURL(); canvas.width = r.width * devicePixelRatio; canvas.height = r.height * devicePixelRatio; ctx.scale(devicePixelRatio, devicePixelRatio); ctx.lineWidth = 2; ctx.lineCap = 'round'; const img = new Image(); img.onload=()=>ctx.drawImage(img,0,0,r.width,r.height); img.src=data; }
+  window.addEventListener('resize', resizeCanvas); resizeCanvas();
+  function pos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
+  function start(e){ drawing=true; signed=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y); e.preventDefault(); }
+  function move(e){ if(!drawing) return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); e.preventDefault(); }
+  function end(){ drawing=false; }
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+  canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',end);
+  byId('clearSignature').addEventListener('click', () => { ctx.clearRect(0,0,canvas.width,canvas.height); signed=false; });
+  function selectedSignatureMethod(){ return document.querySelector('input[name="signatureMethod"]:checked').value; }
+  function updateSignatureMode(){
+    const isTyped = selectedSignatureMethod() === 'type';
+    drawSignaturePanel.classList.toggle('hidden', isTyped);
+    typeSignaturePanel.classList.toggle('hidden', !isTyped);
+    if(isTyped) typedSignature.focus();
+    else requestAnimationFrame(resizeCanvas);
+  }
+  function updateTypedSignaturePreview(){
+    const value = typedSignature.value.trim();
+    typedSignaturePreview.textContent = value || 'Typed signature preview';
+    typedSignaturePreview.classList.toggle('empty', !value);
+  }
+  function typedSignatureDataUrl(name){
+    const typedCanvas = document.createElement('canvas');
+    typedCanvas.width = 900;
+    typedCanvas.height = 220;
+    const typedCtx = typedCanvas.getContext('2d');
+    typedCtx.fillStyle = '#fff';
+    typedCtx.fillRect(0, 0, typedCanvas.width, typedCanvas.height);
+    typedCtx.strokeStyle = '#d7dee8';
+    typedCtx.lineWidth = 2;
+    typedCtx.beginPath();
+    typedCtx.moveTo(50, 170);
+    typedCtx.lineTo(850, 170);
+    typedCtx.stroke();
+    typedCtx.fillStyle = '#17212b';
+    typedCtx.font = '76px "Brush Script MT", "Segoe Script", cursive';
+    typedCtx.textBaseline = 'middle';
+    typedCtx.fillText(name, 55, 108, 790);
+    return typedCanvas.toDataURL('image/png');
+  }
+  function currentSignatureDataUrl(){
+    if(selectedSignatureMethod() === 'type') {
+      const name = typedSignature.value.trim();
+      return name ? typedSignatureDataUrl(name) : '';
+    }
+    return signed ? canvas.toDataURL('image/png') : '';
+  }
+  function resetSignature(){
+    document.querySelector('input[name="signatureMethod"][value="draw"]').checked = true;
+    typedSignature.value = '';
+    updateTypedSignaturePreview();
+    signed=false;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    updateSignatureMode();
+  }
+  document.querySelectorAll('input[name="signatureMethod"]').forEach(input => input.addEventListener('change', updateSignatureMode));
+  typedSignature.addEventListener('input', updateTypedSignaturePreview);
+  updateTypedSignaturePreview();
+
+  byId('date').valueAsDate = new Date();
+  byId('signatureDate').valueAsDate = new Date();
+
+  byId('intakeForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const signature = currentSignatureDataUrl();
+    if(!signature){ setStatus(byId('formStatus'), 'Please draw or type your signature before submitting.'); return; }
+    const fd = new FormData(e.target);
+    const data = Object.fromEntries(fd.entries());
+    data.caseTypes = fd.getAll('caseTypes');
+    data.children = collectChildren(fd);
+    data.childrenText = data.children.length ? data.children.map((child, i) => `Child ${i + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'}`).join('\n') : '';
+    data.submissionType = 'online_form';
+    data.signature = signature;
+    data.timestamp = new Date().toISOString();
+    const client = sanitizeFilePart(data.clientName);
+    const matter = sanitizeFilePart((data.caseTypes && data.caseTypes[0]) || 'Intake');
+    data.clientNameForFile = client;
+    data.matterTypeForFile = matter;
+    data.generatedDocxFileName = `${client}_${matter}_Completed_Form.docx`;
+    data.generatedPdfFileName = `${client}_${matter}_Completed_Form.pdf`;
+    try {
+      setStatus(byId('formStatus'), 'Submitting...', true);
+      const res = await fetch(API_ENDPOINTS.online, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+      if(!res.ok) throw new Error(await readResponseMessage(res, 'Submission failed with status ' + res.status));
+      setStatus(byId('formStatus'), 'Submitted successfully. Thank you.', true);
+      e.target.reset(); childrenContainer.innerHTML = ''; childCount = 0; for(let i = 0; i < 4; i += 1) addChild(); resetSignature(); byId('date').valueAsDate = new Date(); byId('signatureDate').valueAsDate = new Date();
+    } catch(err) { setStatus(byId('formStatus'), err.message); }
+  });
+</script>
+</body>
+</html>

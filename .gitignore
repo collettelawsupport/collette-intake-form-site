@@ -1,0 +1,6 @@
+.env
+node_modules/
+.netlify/
+.DS_Store
+npm-debug.log*
+*.zip

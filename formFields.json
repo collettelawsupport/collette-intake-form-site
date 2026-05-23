@@ -1,0 +1,353 @@
+[
+  {
+    "id": "date",
+    "label": "Date",
+    "type": "date",
+    "required": true,
+    "templateKey": "date"
+  },
+  {
+    "id": "clientName",
+    "label": "Full Name",
+    "type": "text",
+    "required": true,
+    "templateKey": "clientName"
+  },
+  {
+    "id": "clientAddress",
+    "label": "Address",
+    "type": "text",
+    "required": true,
+    "templateKey": "clientAddress"
+  },
+  {
+    "id": "clientState",
+    "label": "State",
+    "type": "text",
+    "required": true,
+    "templateKey": "clientState"
+  },
+  {
+    "id": "clientZip",
+    "label": "Zip",
+    "type": "text",
+    "required": true,
+    "templateKey": "clientZip"
+  },
+  {
+    "id": "clientCounty",
+    "label": "County",
+    "type": "text",
+    "required": false,
+    "templateKey": "clientCounty"
+  },
+  {
+    "id": "residenceLength",
+    "label": "How long at address",
+    "type": "text",
+    "required": false,
+    "templateKey": "residenceLength"
+  },
+  {
+    "id": "clientDob",
+    "label": "Date of Birth",
+    "type": "date",
+    "required": false,
+    "templateKey": "clientDob"
+  },
+  {
+    "id": "clientDlLast3",
+    "label": "Last 3 Digits of Driver License",
+    "type": "text",
+    "required": false,
+    "templateKey": "clientDlLast3"
+  },
+  {
+    "id": "clientSsnLast3",
+    "label": "Last 3 Digits of SSN",
+    "type": "text",
+    "required": false,
+    "templateKey": "clientSsnLast3"
+  },
+  {
+    "id": "clientPhone",
+    "label": "Phone",
+    "type": "tel",
+    "required": true,
+    "templateKey": "clientPhone"
+  },
+  {
+    "id": "clientEmail",
+    "label": "Email",
+    "type": "email",
+    "required": true,
+    "templateKey": "clientEmail"
+  },
+  {
+    "id": "employer",
+    "label": "Employer",
+    "type": "text",
+    "required": false,
+    "templateKey": "employer"
+  },
+  {
+    "id": "employerAddress",
+    "label": "Employer Address",
+    "type": "text",
+    "required": false,
+    "templateKey": "employerAddress"
+  },
+  {
+    "id": "employerPhone",
+    "label": "Employer Phone",
+    "type": "tel",
+    "required": false,
+    "templateKey": "employerPhone"
+  },
+  {
+    "id": "monthlyIncome",
+    "label": "Monthly Income",
+    "type": "number",
+    "required": false,
+    "templateKey": "monthlyIncome"
+  },
+  {
+    "id": "dateOfMarriage",
+    "label": "Date of Marriage",
+    "type": "date",
+    "required": false,
+    "templateKey": "dateOfMarriage"
+  },
+  {
+    "id": "dateCeasedLivingTogether",
+    "label": "Date ceased to live together",
+    "type": "date",
+    "required": false,
+    "templateKey": "dateCeasedLivingTogether"
+  },
+  {
+    "id": "marriageCityState",
+    "label": "City and State of Marriage",
+    "type": "text",
+    "required": false,
+    "templateKey": "marriageCityState"
+  },
+  {
+    "id": "maidenName",
+    "label": "Maiden Name",
+    "type": "text",
+    "required": false,
+    "templateKey": "maidenName"
+  },
+  {
+    "id": "spouseName",
+    "label": "Spouse Full Name",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseName"
+  },
+  {
+    "id": "spouseAddress",
+    "label": "Spouse Address",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseAddress"
+  },
+  {
+    "id": "spouseCounty",
+    "label": "Spouse County",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseCounty"
+  },
+  {
+    "id": "spouseDob",
+    "label": "Spouse Date of Birth",
+    "type": "date",
+    "required": false,
+    "templateKey": "spouseDob"
+  },
+  {
+    "id": "spouseDlLast3",
+    "label": "Spouse Last 3 Digits of Driver License",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseDlLast3"
+  },
+  {
+    "id": "spouseSsnLast3",
+    "label": "Spouse Last 3 Digits of SSN",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseSsnLast3"
+  },
+  {
+    "id": "spousePhone",
+    "label": "Spouse Phone",
+    "type": "tel",
+    "required": false,
+    "templateKey": "spousePhone"
+  },
+  {
+    "id": "spouseEmail",
+    "label": "Spouse Email",
+    "type": "email",
+    "required": false,
+    "templateKey": "spouseEmail"
+  },
+  {
+    "id": "spouseEmployer",
+    "label": "Spouse Employer",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseEmployer"
+  },
+  {
+    "id": "spouseEmployerStartYear",
+    "label": "Spouse Employer Start Year",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseEmployerStartYear"
+  },
+  {
+    "id": "spouseEmployerAddress",
+    "label": "Spouse Employer Address",
+    "type": "text",
+    "required": false,
+    "templateKey": "spouseEmployerAddress"
+  },
+  {
+    "id": "spouseEmployerPhone",
+    "label": "Spouse Employer Phone",
+    "type": "tel",
+    "required": false,
+    "templateKey": "spouseEmployerPhone"
+  },
+  {
+    "id": "spouseMonthlyIncome",
+    "label": "Spouse Monthly Income",
+    "type": "number",
+    "required": false,
+    "templateKey": "spouseMonthlyIncome"
+  },
+  {
+    "id": "children",
+    "label": "Children",
+    "type": "repeatable-group",
+    "required": false,
+    "templateKey": "childrenText",
+    "minimumRows": 4,
+    "allowAdditionalRows": true,
+    "itemFields": [
+      {
+        "id": "name",
+        "label": "Child Name",
+        "type": "text",
+        "required": false
+      },
+      {
+        "id": "dateOfBirth",
+        "label": "Child Date of Birth",
+        "type": "date",
+        "required": false
+      }
+    ],
+    "payloadNotes": "The HTML also sends child1Name/child1Dob through childNName/childNDob for compatibility, plus children[] and childrenText for document generation."
+  },
+  {
+    "id": "caseTypes",
+    "label": "Type of Case",
+    "type": "checkbox-group",
+    "required": false,
+    "options": [
+      "Divorce with Children",
+      "Divorce without Children",
+      "Modification of Current Order",
+      "Child Support",
+      "Visitation",
+      "Conservatorship",
+      "Relinquishment",
+      "Adoption",
+      "Probate",
+      "Estate Planning",
+      "Personal Injury",
+      "Civil Litigation"
+    ],
+    "templateKey": "caseTypes"
+  },
+  {
+    "id": "requestingNameChange",
+    "label": "Are you requesting a name change?",
+    "type": "text",
+    "required": false,
+    "templateKey": "requestingNameChange"
+  },
+  {
+    "id": "caseFiled",
+    "label": "Has a case been filed?",
+    "type": "text",
+    "required": false,
+    "templateKey": "caseFiled"
+  },
+  {
+    "id": "served",
+    "label": "If yes, have you been served?",
+    "type": "text",
+    "required": false,
+    "templateKey": "served"
+  },
+  {
+    "id": "servedWhen",
+    "label": "When were you served?",
+    "type": "text",
+    "required": false,
+    "templateKey": "servedWhen"
+  },
+  {
+    "id": "mainLegalIssue",
+    "label": "Main Legal Issue",
+    "type": "textarea",
+    "required": true,
+    "templateKey": "mainLegalIssue"
+  },
+  {
+    "id": "referralSource",
+    "label": "How did you hear about our law firm?",
+    "type": "text",
+    "required": false,
+    "templateKey": "referralSource"
+  },
+  {
+    "id": "signatureMethod",
+    "label": "Signature Method",
+    "type": "radio-group",
+    "required": true,
+    "options": [
+      "draw",
+      "type"
+    ],
+    "templateKey": "signatureMethod"
+  },
+  {
+    "id": "typedSignature",
+    "label": "Typed Signature",
+    "type": "text",
+    "required": false,
+    "templateKey": "typedSignature",
+    "payloadNotes": "Only populated when the client selects Type signature. The signature field is still sent as a PNG data URL."
+  },
+  {
+    "id": "signature",
+    "label": "Signature",
+    "type": "signature",
+    "required": true,
+    "templateKey": "signature"
+  },
+  {
+    "id": "signatureDate",
+    "label": "Signature Date",
+    "type": "date",
+    "required": true,
+    "templateKey": "signatureDate"
+  }
+]

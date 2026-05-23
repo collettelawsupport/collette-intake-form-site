@@ -1,0 +1,17 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["ClientIntakeForm_Automation_Template.docx"]
+
+[[redirects]]
+  from = "/api/online-submission"
+  to = "/.netlify/functions/online-submission"
+  status = 200
+
+[[redirects]]
+  from = "/api/manual-upload"
+  to = "/.netlify/functions/manual-upload"
+  status = 200

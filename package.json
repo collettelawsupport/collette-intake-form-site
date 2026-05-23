@@ -1,0 +1,15 @@
+{
+  "name": "collette-intake-form-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static Collette Law intake form with secure Netlify Functions for Power Automate submissions.",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js"
+  }
+}

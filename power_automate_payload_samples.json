@@ -1,0 +1,60 @@
+{
+  "online_form": {
+    "submissionType": "online_form",
+    "source": "collette-intake-form-netlify",
+    "clientName": "Jane Client",
+    "caseTypes": [
+      "Estate Planning"
+    ],
+    "caseTypesText": "Estate Planning",
+    "clientNameForFile": "Jane_Client",
+    "matterTypeForFile": "Estate_Planning",
+    "generatedDocxFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
+    "generatedPdfFileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",
+    "signatureMethod": "type",
+    "typedSignature": "Jane Client",
+    "signature": "data:image/png;base64,...",
+    "timestamp": "2026-05-22T00:00:00.000Z",
+    "receivedAt": "2026-05-22T00:00:01.000Z",
+    "children": [
+      {
+        "name": "Jane Doe",
+        "dateOfBirth": "2015-04-10"
+      }
+    ],
+    "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10",
+    "documentGeneration": {
+      "action": "create_docx_and_pdf",
+      "templateFileName": "ClientIntakeForm_Automation_Template.docx",
+      "outputDocxFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
+      "outputPdfFileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",
+      "templateData": {
+        "clientName": "Jane Client",
+        "caseTypesText": "Estate Planning",
+        "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10",
+        "signatureMethod": "type",
+        "typedSignature": "Jane Client",
+        "signature": "data:image/png;base64,..."
+      }
+    }
+  },
+  "manual_upload": {
+    "submissionType": "manual_upload",
+    "source": "collette-intake-form-netlify",
+    "clientName": "Jane Client",
+    "matterType": "Estate Planning",
+    "clientNameForFile": "Jane_Client",
+    "matterTypeForFile": "Estate_Planning",
+    "uploadedFileName": "finished-intake.pdf",
+    "normalizedUploadedFileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",
+    "timestamp": "2026-05-22T00:00:00.000Z",
+    "receivedAt": "2026-05-22T00:00:01.000Z",
+    "file": {
+      "fileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",
+      "originalFileName": "finished-intake.pdf",
+      "contentType": "application/pdf",
+      "size": 12345,
+      "contentBase64": "..."
+    }
+  }
+}
