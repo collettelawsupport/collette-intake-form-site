@@ -77,11 +77,11 @@ Replace `your-site-name.netlify.app` with the actual Netlify subdomain for the d
 
 Set these in Netlify's environment variable UI, CLI, or API. Do not put the real webhook URL in `netlify.toml`; Netlify does not expose `netlify.toml` variables to Functions at runtime.
 
-- `POWER_AUTOMATE_WEBHOOK_URL` - required. The Power Automate HTTP trigger URL.
+- `POWER_AUTOMATE_WEBHOOK_URL` - required only when you are ready to forward submissions to Power Automate. The online form can still generate and download the completed Word document without it.
 - `MAX_UPLOAD_BYTES` - optional. Defaults to `15728640` bytes.
 - `MAX_JSON_BODY_BYTES` - optional. Defaults to `31457280` bytes.
 - `POWER_AUTOMATE_TIMEOUT_MS` - optional. Defaults to `20000`.
-- `INCLUDE_TEMPLATE_BASE64` - optional. Set to `true` to include the automation template as base64 in each online submission payload.
+- `INCLUDE_TEMPLATE_BASE64` - optional. Usually leave this unset. Set to `true` only if you want the original automation template included in the online submission payload for troubleshooting.
 
 ## Local Setup
 
@@ -109,7 +109,9 @@ The local server mirrors the Netlify endpoints and serves the same `public/index
 
 ## Online Form Payload
 
-Online submissions include all form fields, `caseTypes`, `children`, `childrenText`, `signatureMethod`, optional `typedSignature`, and `signature` as a PNG data URL. Drawn and typed signatures both use the same `signature` image field. The backend recomputes these output names:
+Online submissions include all form fields, `caseTypes`, `children`, `childrenText`, `signatureMethod`, optional `typedSignature`, and `signature` as a PNG data URL. Drawn and typed signatures both use the same `signature` image field.
+
+The Netlify Function generates the completed Word document from `ClientIntakeForm_Automation_Template.docx`, returns it to the browser for automatic download, and forwards that same completed DOCX to Power Automate when `POWER_AUTOMATE_WEBHOOK_URL` is configured. The backend recomputes these output names:
 
 - `generatedDocxFileName`
 - `generatedPdfFileName`
@@ -121,8 +123,16 @@ The Power Automate payload also includes:
 ```json
 {
   "submissionType": "online_form",
+  "completedFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
+  "completedFileContentBase64": "...",
+  "file": {
+    "fileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
+    "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "size": 12345,
+    "contentBase64": "..."
+  },
   "documentGeneration": {
-    "action": "create_docx_and_pdf",
+    "action": "website_generated_docx",
     "templateFileName": "ClientIntakeForm_Automation_Template.docx",
     "outputDocxFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
     "outputPdfFileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",
@@ -131,9 +141,7 @@ The Power Automate payload also includes:
 }
 ```
 
-Use `documentGeneration.templateData` to populate the Word template. Then save the DOCX using `outputDocxFileName`, convert it to PDF, and save the PDF using `outputPdfFileName`.
-
-If `INCLUDE_TEMPLATE_BASE64=true`, the function also adds `documentGeneration.template.contentBase64`.
+In Power Automate, create a file from `base64ToBinary(triggerBody()?['file']?['contentBase64'])` and use `triggerBody()?['file']?['fileName']` as the destination name. Power Automate does not need to populate the Word template.
 
 ## Manual Upload Payload
 
@@ -159,19 +167,14 @@ In Power Automate, create a file from `base64ToBinary(triggerBody()?['file']?['c
 
 ## Power Automate Flow
 
-Create one flow with an HTTP trigger and branch on `submissionType`.
+Create one flow with an HTTP trigger. Both online submissions and manual uploads now include a ready-to-save file object.
 
-For `online_form`:
+1. Trigger: `When an HTTP request is received`.
+2. Optional Compose: `triggerBody()?['file']?['fileName']`.
+3. Create file in SharePoint or OneDrive:
+   - File name: `triggerBody()?['file']?['fileName']`
+   - File content: `base64ToBinary(triggerBody()?['file']?['contentBase64'])`
+4. Get file content, if your email step needs it as an attachment.
+5. Send email from the shared mailbox, attaching the created file.
 
-1. Read `documentGeneration.templateData`.
-2. Populate `ClientIntakeForm_Automation_Template.docx` with fields such as `clientName`, `caseTypesText`, `childrenText`, `mainLegalIssue`, `signature`, and `signatureDate`.
-3. Save the completed DOCX as `documentGeneration.outputDocxFileName`.
-4. Convert the DOCX to PDF.
-5. Save the PDF as `documentGeneration.outputPdfFileName`.
-
-For `manual_upload`:
-
-1. Read `file.contentBase64`.
-2. Convert it with `base64ToBinary(...)`.
-3. Save it as `file.fileName`.
-4. Route or copy it to the same SharePoint/OneDrive destination as online submissions.
+If you want different folders for online vs. manual submissions, add a condition on `triggerBody()?['submissionType']`.

@@ -16,6 +16,14 @@
     "signature": "data:image/png;base64,...",
     "timestamp": "2026-05-22T00:00:00.000Z",
     "receivedAt": "2026-05-22T00:00:01.000Z",
+    "completedFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
+    "completedFileContentBase64": "...",
+    "file": {
+      "fileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
+      "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "size": 12345,
+      "contentBase64": "..."
+    },
     "children": [
       {
         "name": "Jane Doe",
@@ -24,7 +32,7 @@
     ],
     "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10",
     "documentGeneration": {
-      "action": "create_docx_and_pdf",
+      "action": "website_generated_docx",
       "templateFileName": "ClientIntakeForm_Automation_Template.docx",
       "outputDocxFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
       "outputPdfFileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",

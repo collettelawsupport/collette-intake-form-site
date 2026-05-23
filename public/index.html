@@ -221,6 +221,19 @@
     reader.onerror = () => reject(new Error('Could not read selected file.'));
     reader.readAsDataURL(file);
   });
+  function downloadBase64File(base64, fileName, contentType){
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: contentType || 'application/octet-stream' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'Completed_Form.docx';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 
   // Drag/drop upload
   let selectedFile = null;
@@ -419,7 +432,9 @@
       setStatus(byId('formStatus'), 'Submitting...', true);
       const res = await fetch(API_ENDPOINTS.online, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
       if(!res.ok) throw new Error(await readResponseMessage(res, 'Submission failed with status ' + res.status));
-      setStatus(byId('formStatus'), 'Submitted successfully. Thank you.', true);
+      const result = await res.json();
+      if(result.downloadContentBase64) downloadBase64File(result.downloadContentBase64, result.downloadFileName, result.downloadContentType);
+      setStatus(byId('formStatus'), result.automationForwarded ? 'Submitted successfully. The completed Word document has downloaded.' : 'Completed Word document downloaded. Power Automate is not connected yet.', true);
       e.target.reset(); childrenContainer.innerHTML = ''; childCount = 0; for(let i = 0; i < 4; i += 1) addChild(); resetSignature(); byId('date').valueAsDate = new Date(); byId('signatureDate').valueAsDate = new Date();
     } catch(err) { setStatus(byId('formStatus'), err.message); }
   });

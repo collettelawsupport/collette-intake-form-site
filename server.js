@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const { URL } = require('node:url');
+const submissionUtils = require('./submission-utils');
 
 const ROOT_DIR = __dirname;
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
@@ -67,76 +68,26 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Collette intake form server listening on http://localhost:${PORT}`);
   if (!WEBHOOK_URL) {
-    console.warn('POWER_AUTOMATE_WEBHOOK_URL is not set. Submissions will return a configuration error.');
+    console.warn('POWER_AUTOMATE_WEBHOOK_URL is not set. Online forms will still download a Word document, but submissions will not be forwarded to Power Automate.');
   }
 });
 
 async function handleOnlineSubmission(req, res) {
   assertJsonRequest(req);
   const body = await readJson(req, MAX_JSON_BODY_BYTES);
-  const requiredFields = [
-    'date',
-    'clientName',
-    'clientAddress',
-    'clientState',
-    'clientZip',
-    'clientPhone',
-    'clientEmail',
-    'mainLegalIssue',
-    'signature',
-    'signatureDate',
-  ];
-
-  const missingFields = requiredFields.filter((field) => !String(body[field] || '').trim());
-  if (missingFields.length) {
-    throw new HttpError(400, `Missing required field(s): ${missingFields.join(', ')}`);
-  }
-
-  if (!isPngDataUrl(body.signature)) {
-    throw new HttpError(400, 'Signature must be a PNG data URL.');
-  }
-
-  const caseTypes = normalizeCaseTypes(body.caseTypes);
-  const children = normalizeChildren(body.children, body);
-  const clientNameForFile = sanitizeFilePart(body.clientName);
-  const matterTypeForFile = sanitizeFilePart(caseTypes[0] || body.matterType || 'Intake');
-  const generatedDocxFileName = `${clientNameForFile}_${matterTypeForFile}_Completed_Form.docx`;
-  const generatedPdfFileName = `${clientNameForFile}_${matterTypeForFile}_Completed_Form.pdf`;
-
-  const templateData = {
-    ...body,
-    submissionType: 'online_form',
-    timestamp: body.timestamp || new Date().toISOString(),
-    caseTypes,
-    caseTypesText: caseTypes.join(', '),
-    children,
-    childrenText: buildChildrenText(children),
-    clientNameForFile,
-    matterTypeForFile,
-    generatedDocxFileName,
-    generatedPdfFileName,
-  };
-
-  const payload = {
-    ...templateData,
-    source: SOURCE_NAME,
-    receivedAt: new Date().toISOString(),
-    documentGeneration: {
-      action: 'create_docx_and_pdf',
-      templateFileName: TEMPLATE_FILE_NAME,
-      outputDocxFileName: generatedDocxFileName,
-      outputPdfFileName: generatedPdfFileName,
-      templateData,
-    },
-  };
-
-  await maybeAttachTemplate(payload);
-  const webhookResult = await postToPowerAutomate(payload);
+  const payload = await submissionUtils.createOnlinePayload(body);
+  const webhookResult = await submissionUtils.postToPowerAutomate(payload, { required: false });
   sendJson(res, 200, {
     ok: true,
-    message: 'Online form submitted successfully.',
-    generatedDocxFileName,
-    generatedPdfFileName,
+    message: webhookResult.skipped
+      ? 'Completed Word document generated. Power Automate is not connected yet.'
+      : 'Completed Word document generated and submitted successfully.',
+    generatedDocxFileName: payload.generatedDocxFileName,
+    generatedPdfFileName: payload.generatedPdfFileName,
+    downloadFileName: payload.file.fileName,
+    downloadContentType: payload.file.contentType,
+    downloadContentBase64: payload.file.contentBase64,
+    automationForwarded: !webhookResult.skipped,
     powerAutomateStatus: webhookResult.status,
   });
 }

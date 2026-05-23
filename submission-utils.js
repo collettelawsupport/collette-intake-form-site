@@ -1,5 +1,6 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const zlib = require('node:zlib');
 
 const TEMPLATE_FILE_NAME = 'ClientIntakeForm_Automation_Template.docx';
 const SOURCE_NAME = 'collette-intake-form-netlify';
@@ -86,12 +87,23 @@ async function createOnlinePayload(body) {
     generatedPdfFileName,
   };
 
+  const completedDocx = await renderCompletedDocx(templateData);
+  const completedDocxBase64 = completedDocx.toString('base64');
+
   const payload = {
     ...templateData,
     source: SOURCE_NAME,
     receivedAt: new Date().toISOString(),
+    completedFileName: generatedDocxFileName,
+    completedFileContentBase64: completedDocxBase64,
+    file: {
+      fileName: generatedDocxFileName,
+      contentType: DOCX_CONTENT_TYPE,
+      size: completedDocx.length,
+      contentBase64: completedDocxBase64,
+    },
     documentGeneration: {
-      action: 'create_docx_and_pdf',
+      action: 'website_generated_docx',
       templateFileName: TEMPLATE_FILE_NAME,
       outputDocxFileName: generatedDocxFileName,
       outputPdfFileName: generatedPdfFileName,
@@ -158,9 +170,11 @@ function createManualUploadPayload(body) {
   };
 }
 
-async function postToPowerAutomate(payload) {
+async function postToPowerAutomate(payload, options = {}) {
   const config = getConfig();
+  const required = options.required !== false;
   if (!config.webhookUrl) {
+    if (!required) return { status: null, skipped: true, body: '' };
     throw new HttpError(500, 'Server is missing POWER_AUTOMATE_WEBHOOK_URL.');
   }
 
@@ -255,6 +269,202 @@ async function readTemplateFile() {
 
   throw new HttpError(500, `${TEMPLATE_FILE_NAME} was not found in the function bundle.`);
 }
+
+async function renderCompletedDocx(templateData) {
+  const templateBuffer = await readTemplateFile();
+  const entries = unzipEntries(templateBuffer);
+  const documentEntry = entries.get('word/document.xml');
+  const relsEntry = entries.get('word/_rels/document.xml.rels');
+  if (!documentEntry || !relsEntry) {
+    throw new HttpError(500, 'The Word template is missing required document parts.');
+  }
+
+  const signatureImage = dataUrlToBuffer(templateData.signature);
+  const signatureRelId = nextRelationshipId(relsEntry.data.toString('utf8'));
+  const signatureFileName = 'word/media/signature.png';
+  const textValues = {
+    ...templateData,
+    caseTypes: templateData.caseTypesText || normalizeCaseTypes(templateData.caseTypes).join(', '),
+    signature: '',
+  };
+
+  let documentXml = documentEntry.data.toString('utf8');
+  for (const [key, value] of Object.entries(textValues)) {
+    if (key === 'signature') continue;
+    documentXml = replacePlaceholder(documentXml, key, value);
+  }
+  documentXml = documentXml.replace(/<w:t>\{\{signature\}\}<\/w:t>/g, signatureDrawingXml(signatureRelId));
+  documentXml = documentXml.replace(/\{\{[A-Za-z0-9_]+\}\}/g, '');
+
+  const relsXml = relsEntry.data
+    .toString('utf8')
+    .replace(
+      '</Relationships>',
+      `<Relationship Id="${signatureRelId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/signature.png"/></Relationships>`,
+    );
+
+  entries.set('word/document.xml', { data: Buffer.from(documentXml, 'utf8') });
+  entries.set('word/_rels/document.xml.rels', { data: Buffer.from(relsXml, 'utf8') });
+  entries.set(signatureFileName, { data: signatureImage });
+  return zipEntries(entries);
+}
+
+function replacePlaceholder(xml, key, value) {
+  const placeholder = `{{${key}}}`;
+  if (!xml.includes(placeholder)) return xml;
+  return xml.split(placeholder).join(xmlTextWithBreaks(value));
+}
+
+function xmlTextWithBreaks(value) {
+  const cleaned = String(value ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return cleaned
+    .split('\n')
+    .map(escapeXml)
+    .join('</w:t><w:br/><w:t>');
+}
+
+function escapeXml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+function dataUrlToBuffer(value) {
+  const match = String(value || '').match(/^data:image\/png;base64,([a-z0-9+/=\s]+)$/i);
+  if (!match) throw new HttpError(400, 'Signature must be a PNG data URL.');
+  return Buffer.from(match[1].replace(/\s/g, ''), 'base64');
+}
+
+function nextRelationshipId(relsXml) {
+  const ids = [...relsXml.matchAll(/Id="rId(\d+)"/g)].map((match) => Number.parseInt(match[1], 10));
+  return `rId${Math.max(0, ...ids) + 1}`;
+}
+
+function signatureDrawingXml(relId) {
+  return `<w:drawing><wp:inline xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><wp:extent cx="3200400" cy="777240"/><wp:docPr id="2001" name="Signature"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="signature.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${relId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="3200400" cy="777240"/></a:xfrm><a:prstGeom prst="rect"/></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing>`;
+}
+
+function unzipEntries(buffer) {
+  const entries = new Map();
+  const eocdOffset = findEndOfCentralDirectory(buffer);
+  const entryCount = buffer.readUInt16LE(eocdOffset + 10);
+  let offset = buffer.readUInt32LE(eocdOffset + 16);
+
+  for (let index = 0; index < entryCount; index += 1) {
+    if (buffer.readUInt32LE(offset) !== 0x02014b50) throw new HttpError(500, 'Invalid Word template zip directory.');
+    const compressionMethod = buffer.readUInt16LE(offset + 10);
+    const compressedSize = buffer.readUInt32LE(offset + 20);
+    const fileNameLength = buffer.readUInt16LE(offset + 28);
+    const extraLength = buffer.readUInt16LE(offset + 30);
+    const commentLength = buffer.readUInt16LE(offset + 32);
+    const localHeaderOffset = buffer.readUInt32LE(offset + 42);
+    const fileName = buffer.subarray(offset + 46, offset + 46 + fileNameLength).toString('utf8');
+
+    const localNameLength = buffer.readUInt16LE(localHeaderOffset + 26);
+    const localExtraLength = buffer.readUInt16LE(localHeaderOffset + 28);
+    const dataOffset = localHeaderOffset + 30 + localNameLength + localExtraLength;
+    const compressedData = buffer.subarray(dataOffset, dataOffset + compressedSize);
+    const data = compressionMethod === 0
+      ? Buffer.from(compressedData)
+      : zlib.inflateRawSync(compressedData);
+
+    entries.set(fileName, { data });
+    offset += 46 + fileNameLength + extraLength + commentLength;
+  }
+
+  return entries;
+}
+
+function findEndOfCentralDirectory(buffer) {
+  for (let offset = buffer.length - 22; offset >= 0; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === 0x06054b50) return offset;
+  }
+  throw new HttpError(500, 'Invalid Word template zip structure.');
+}
+
+function zipEntries(entries) {
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  for (const [fileName, entry] of entries) {
+    const fileNameBuffer = Buffer.from(fileName, 'utf8');
+    const data = Buffer.from(entry.data);
+    const compressedData = zlib.deflateRawSync(data);
+    const crc = crc32(data);
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);
+    localHeader.writeUInt16LE(20, 4);
+    localHeader.writeUInt16LE(0, 6);
+    localHeader.writeUInt16LE(8, 8);
+    localHeader.writeUInt16LE(0, 10);
+    localHeader.writeUInt16LE(0, 12);
+    localHeader.writeUInt32LE(crc, 14);
+    localHeader.writeUInt32LE(compressedData.length, 18);
+    localHeader.writeUInt32LE(data.length, 22);
+    localHeader.writeUInt16LE(fileNameBuffer.length, 26);
+    localHeader.writeUInt16LE(0, 28);
+    localParts.push(localHeader, fileNameBuffer, compressedData);
+
+    const centralHeader = Buffer.alloc(46);
+    centralHeader.writeUInt32LE(0x02014b50, 0);
+    centralHeader.writeUInt16LE(20, 4);
+    centralHeader.writeUInt16LE(20, 6);
+    centralHeader.writeUInt16LE(0, 8);
+    centralHeader.writeUInt16LE(8, 10);
+    centralHeader.writeUInt16LE(0, 12);
+    centralHeader.writeUInt16LE(0, 14);
+    centralHeader.writeUInt32LE(crc, 16);
+    centralHeader.writeUInt32LE(compressedData.length, 20);
+    centralHeader.writeUInt32LE(data.length, 24);
+    centralHeader.writeUInt16LE(fileNameBuffer.length, 28);
+    centralHeader.writeUInt16LE(0, 30);
+    centralHeader.writeUInt16LE(0, 32);
+    centralHeader.writeUInt16LE(0, 34);
+    centralHeader.writeUInt16LE(0, 36);
+    centralHeader.writeUInt32LE(0, 38);
+    centralHeader.writeUInt32LE(offset, 42);
+    centralParts.push(centralHeader, fileNameBuffer);
+
+    offset += localHeader.length + fileNameBuffer.length + compressedData.length;
+  }
+
+  const centralDirectory = Buffer.concat(centralParts);
+  const endRecord = Buffer.alloc(22);
+  endRecord.writeUInt32LE(0x06054b50, 0);
+  endRecord.writeUInt16LE(0, 4);
+  endRecord.writeUInt16LE(0, 6);
+  endRecord.writeUInt16LE(entries.size, 8);
+  endRecord.writeUInt16LE(entries.size, 10);
+  endRecord.writeUInt32LE(centralDirectory.length, 12);
+  endRecord.writeUInt32LE(offset, 16);
+  endRecord.writeUInt16LE(0, 20);
+
+  return Buffer.concat([...localParts, centralDirectory, endRecord]);
+}
+
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) {
+    crc = (crc >>> 8) ^ CRC_TABLE[(crc ^ byte) & 0xff];
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let index = 0; index < 256; index += 1) {
+    let value = index;
+    for (let bit = 0; bit < 8; bit += 1) {
+      value = (value & 1) ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
+    }
+    table[index] = value >>> 0;
+  }
+  return table;
+})();
 
 function normalizeCaseTypes(value) {
   const values = Array.isArray(value) ? value : [value].filter(Boolean);
