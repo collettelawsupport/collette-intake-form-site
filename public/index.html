@@ -189,7 +189,7 @@
       </div>
       <div id="typeSignaturePanel" class="signature-panel hidden">
         <label for="typedSignature">Typed Signature *</label>
-        <input id="typedSignature" name="typedSignature" autocomplete="name" />
+        <input id="typedSignature" name="typedSignature" autocomplete="name" autocapitalize="words" autocorrect="off" spellcheck="false" />
         <div id="typedSignaturePreview" class="typed-signature-preview empty">Typed signature preview</div>
       </div>
       <div class="grid"><div><label for="signatureDate">Signature Date *</label><input id="signatureDate" name="signatureDate" type="date" required /></div></div>
@@ -344,8 +344,15 @@
     if(isTyped) typedSignature.focus();
     else requestAnimationFrame(resizeCanvas);
   }
+  function formatTypedSignatureName(value){
+    const cleaned = String(value || '').replace(/\s+/g, ' ').trim();
+    if(!cleaned) return '';
+    const hasLowercase = /[a-z]/.test(cleaned);
+    if(hasLowercase) return cleaned;
+    return cleaned.toLowerCase().replace(/(^|[\s'-])([a-z])/g, (match, prefix, letter) => prefix + letter.toUpperCase());
+  }
   function updateTypedSignaturePreview(){
-    const value = typedSignature.value.trim();
+    const value = formatTypedSignatureName(typedSignature.value);
     typedSignaturePreview.textContent = value || 'Typed signature preview';
     typedSignaturePreview.classList.toggle('empty', !value);
   }
@@ -370,7 +377,7 @@
   }
   function currentSignatureDataUrl(){
     if(selectedSignatureMethod() === 'type') {
-      const name = typedSignature.value.trim();
+      const name = formatTypedSignatureName(typedSignature.value);
       return name ? typedSignatureDataUrl(name) : '';
     }
     return signed ? canvas.toDataURL('image/png') : '';
