@@ -66,6 +66,7 @@ async function createOnlinePayload(body) {
     throw new HttpError(400, 'Signature must be a PNG data URL.');
   }
 
+  const clientIdentifierFields = normalizeClientIdentifierFields(body);
   const caseTypes = normalizeCaseTypes(body.caseTypes);
   const children = normalizeChildren(body.children, body);
   const clientNameForFile = sanitizeFilePart(body.clientName);
@@ -75,6 +76,7 @@ async function createOnlinePayload(body) {
 
   const templateData = {
     ...body,
+    ...clientIdentifierFields,
     submissionType: 'online_form',
     timestamp: body.timestamp || new Date().toISOString(),
     caseTypes,
@@ -495,6 +497,32 @@ function buildChildrenText(children) {
   return children.length
     ? children.map((child, index) => `Child ${index + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'}`).join('\n')
     : '';
+}
+
+function normalizeClientIdentifierFields(body) {
+  const clientNoDriversLicense = isTruthy(body.clientNoDriversLicense);
+  const clientNoSsn = isTruthy(body.clientNoSsn);
+  const clientDlLast3 = String(body.clientDlLast3 || '').trim();
+  const clientSsnLast3 = String(body.clientSsnLast3 || '').trim();
+
+  if (!clientNoDriversLicense && !/^\d{3}$/.test(clientDlLast3)) {
+    throw new HttpError(400, "Last 3 digits of driver's license are required unless the client does not have a driver's license.");
+  }
+
+  if (!clientNoSsn && !/^\d{3}$/.test(clientSsnLast3)) {
+    throw new HttpError(400, 'Last 3 digits of Social Security number are required unless the client does not have a Social Security number.');
+  }
+
+  return {
+    clientNoDriversLicense,
+    clientNoSsn,
+    clientDlLast3: clientNoDriversLicense ? "No driver's license" : clientDlLast3,
+    clientSsnLast3: clientNoSsn ? 'No Social Security number' : clientSsnLast3,
+  };
+}
+
+function isTruthy(value) {
+  return value === true || /^(true|1|on|yes)$/i.test(String(value || '').trim());
 }
 
 function sanitizeFilePart(value) {

@@ -3,6 +3,10 @@
     "submissionType": "online_form",
     "source": "collette-intake-form-netlify",
     "clientName": "Jane Client",
+    "clientDlLast3": "123",
+    "clientNoDriversLicense": false,
+    "clientSsnLast3": "456",
+    "clientNoSsn": false,
     "caseTypes": [
       "Estate Planning"
     ],
@@ -38,6 +42,10 @@
       "outputPdfFileName": "Jane_Client_Estate_Planning_Completed_Form.pdf",
       "templateData": {
         "clientName": "Jane Client",
+        "clientDlLast3": "123",
+        "clientNoDriversLicense": false,
+        "clientSsnLast3": "456",
+        "clientNoSsn": false,
         "caseTypesText": "Estate Planning",
         "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10",
         "signatureMethod": "type",

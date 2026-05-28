@@ -109,7 +109,7 @@ The local server mirrors the Netlify endpoints and serves the same `public/index
 
 ## Online Form Payload
 
-Online submissions include all form fields, `caseTypes`, `children`, `childrenText`, `signatureMethod`, optional `typedSignature`, and `signature` as a PNG data URL. Drawn and typed signatures both use the same `signature` image field.
+Online submissions include all form fields, `caseTypes`, `children`, `childrenText`, `signatureMethod`, optional `typedSignature`, and `signature` as a PNG data URL. Drawn and typed signatures both use the same `signature` image field. The client driver's license last 3 and SSN last 3 are required unless the matching `clientNoDriversLicense` or `clientNoSsn` checkbox is selected.
 
 The Netlify Function generates the completed Word document from `ClientIntakeForm_Automation_Template.docx`, returns it to the browser for automatic download, and forwards that same completed DOCX to Power Automate when `POWER_AUTOMATE_WEBHOOK_URL` is configured. The backend recomputes these output names:
 
@@ -123,6 +123,10 @@ The Power Automate payload also includes:
 ```json
 {
   "submissionType": "online_form",
+  "clientDlLast3": "123",
+  "clientNoDriversLicense": false,
+  "clientSsnLast3": "456",
+  "clientNoSsn": false,
   "completedFileName": "Jane_Client_Estate_Planning_Completed_Form.docx",
   "completedFileContentBase64": "...",
   "file": {

@@ -25,12 +25,15 @@
     .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
     label { display:block; font-weight:700; margin-bottom:6px; }
     input, textarea, select { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px; font:inherit; background:#fff; }
+    input:disabled { background:#f1f4f7; color:#657484; }
     textarea { min-height:110px; resize:vertical; }
     fieldset { border:1px solid var(--border); border-radius:12px; padding:14px; margin:16px 0; }
     legend { font-weight:800; color:var(--primary); padding:0 6px; }
     .checks { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
     .checks label { font-weight:400; display:flex; gap:8px; align-items:center; }
     .checks input { width:auto; }
+    .inline-check { display:flex; align-items:center; gap:8px; margin-top:8px; margin-bottom:0; font-weight:400; color:#52606d; }
+    .inline-check input { width:auto; }
     .signature-pad { border:1px solid var(--border); border-radius:10px; width:100%; height:170px; background:#fff; touch-action:none; }
     .signature-methods { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; }
     .signature-methods label { display:flex; align-items:center; gap:8px; margin:0; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:#fbfdff; cursor:pointer; }
@@ -110,8 +113,16 @@
       <div><label for="clientCounty">County</label><input id="clientCounty" name="clientCounty" /></div>
       <div><label for="residenceLength">How long at address</label><input id="residenceLength" name="residenceLength" /></div>
       <div><label for="clientDob">Date of Birth</label><input id="clientDob" name="clientDob" type="date" /></div>
-      <div><label for="clientDlLast3">Last 3 Digits of Driver License</label><input id="clientDlLast3" name="clientDlLast3" maxlength="3" /></div>
-      <div><label for="clientSsnLast3">Last 3 Digits of SSN</label><input id="clientSsnLast3" name="clientSsnLast3" maxlength="3" /></div>
+      <div>
+        <label for="clientDlLast3">Last 3 Digits of Driver License *</label>
+        <input id="clientDlLast3" name="clientDlLast3" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" title="Enter exactly 3 digits." required />
+        <label class="inline-check" for="clientNoDriversLicense"><input id="clientNoDriversLicense" name="clientNoDriversLicense" type="checkbox" value="true" /> Client does not have a driver's license</label>
+      </div>
+      <div>
+        <label for="clientSsnLast3">Last 3 Digits of SSN *</label>
+        <input id="clientSsnLast3" name="clientSsnLast3" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" title="Enter exactly 3 digits." required />
+        <label class="inline-check" for="clientNoSsn"><input id="clientNoSsn" name="clientNoSsn" type="checkbox" value="true" /> Client does not have a Social Security number</label>
+      </div>
       <div><label for="clientPhone">Phone *</label><input id="clientPhone" name="clientPhone" type="tel" required /></div>
       <div><label for="clientEmail">Email *</label><input id="clientEmail" name="clientEmail" type="email" required /></div>
     </div></fieldset>
@@ -234,6 +245,22 @@
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function bindRequiredLast3Field(inputId, checkboxId){
+    const input = byId(inputId);
+    const checkbox = byId(checkboxId);
+    const sync = () => {
+      const bypassed = checkbox.checked;
+      input.required = !bypassed;
+      input.disabled = bypassed;
+      if(bypassed) input.value = '';
+    };
+    input.addEventListener('input', () => { input.value = input.value.replace(/\D/g, '').slice(0, 3); });
+    checkbox.addEventListener('change', sync);
+    sync();
+    return sync;
+  }
+  const syncClientDlLast3 = bindRequiredLast3Field('clientDlLast3', 'clientNoDriversLicense');
+  const syncClientSsnLast3 = bindRequiredLast3Field('clientSsnLast3', 'clientNoSsn');
 
   // Drag/drop upload
   let selectedFile = null;
@@ -421,6 +448,8 @@
     data.childrenText = data.children.length ? data.children.map((child, i) => `Child ${i + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'}`).join('\n') : '';
     data.submissionType = 'online_form';
     data.signature = signature;
+    data.clientNoDriversLicense = byId('clientNoDriversLicense').checked;
+    data.clientNoSsn = byId('clientNoSsn').checked;
     data.timestamp = new Date().toISOString();
     const client = sanitizeFilePart(data.clientName);
     const matter = sanitizeFilePart((data.caseTypes && data.caseTypes[0]) || 'Intake');
@@ -435,7 +464,7 @@
       const result = await res.json();
       if(result.downloadContentBase64) downloadBase64File(result.downloadContentBase64, result.downloadFileName, result.downloadContentType);
       setStatus(byId('formStatus'), result.automationForwarded ? 'Submitted successfully. The completed Word document has downloaded.' : 'Completed Word document downloaded. Power Automate is not connected yet.', true);
-      e.target.reset(); childrenContainer.innerHTML = ''; childCount = 0; for(let i = 0; i < 4; i += 1) addChild(); resetSignature(); byId('date').valueAsDate = new Date(); byId('signatureDate').valueAsDate = new Date();
+      e.target.reset(); syncClientDlLast3(); syncClientSsnLast3(); childrenContainer.innerHTML = ''; childCount = 0; for(let i = 0; i < 4; i += 1) addChild(); resetSignature(); byId('date').valueAsDate = new Date(); byId('signatureDate').valueAsDate = new Date();
     } catch(err) { setStatus(byId('formStatus'), err.message); }
   });
 </script>
