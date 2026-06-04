@@ -2,7 +2,7 @@
   {
     "id": "date",
     "label": "Date",
-    "type": "date",
+    "type": "text",
     "required": true,
     "templateKey": "date"
   },
@@ -58,7 +58,7 @@
   {
     "id": "clientDob",
     "label": "Date of Birth",
-    "type": "date",
+    "type": "text",
     "required": false,
     "templateKey": "clientDob"
   },
@@ -121,14 +121,14 @@
   {
     "id": "dateOfMarriage",
     "label": "Date of Marriage",
-    "type": "date",
+    "type": "text",
     "required": false,
     "templateKey": "dateOfMarriage"
   },
   {
     "id": "dateCeasedLivingTogether",
     "label": "Date ceased to live together",
-    "type": "date",
+    "type": "text",
     "required": false,
     "templateKey": "dateCeasedLivingTogether"
   },
@@ -170,7 +170,7 @@
   {
     "id": "spouseDob",
     "label": "Spouse Date of Birth",
-    "type": "date",
+    "type": "text",
     "required": false,
     "templateKey": "spouseDob"
   },
@@ -255,7 +255,7 @@
       {
         "id": "dateOfBirth",
         "label": "Child Date of Birth",
-        "type": "date",
+        "type": "text",
         "required": false
       }
     ],
@@ -353,7 +353,7 @@
   {
     "id": "signatureDate",
     "label": "Signature Date",
-    "type": "date",
+    "type": "text",
     "required": true,
     "templateKey": "signatureDate"
   }

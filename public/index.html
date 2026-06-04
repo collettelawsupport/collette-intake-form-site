@@ -105,7 +105,7 @@
   <form id="intakeForm" class="card">
     <h2>Online Intake Form</h2>
     <fieldset><legend>Client Information</legend><div class="grid">
-      <div><label for="date">Date *</label><input id="date" name="date" type="date" required /></div>
+      <div><label for="date">Date *</label><input id="date" name="date" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." required /></div>
       <div><label for="clientName">Full Name *</label><input id="clientName" name="clientName" required /></div>
       <div class="full"><label for="clientAddress">Address *</label><input id="clientAddress" name="clientAddress" required /></div>
       <div><label for="clientCity">City *</label><input id="clientCity" name="clientCity" required /></div>
@@ -113,7 +113,7 @@
       <div><label for="clientZip">Zip *</label><input id="clientZip" name="clientZip" required /></div>
       <div><label for="clientCounty">County</label><input id="clientCounty" name="clientCounty" /></div>
       <div><label for="residenceLength">How long at address</label><input id="residenceLength" name="residenceLength" /></div>
-      <div><label for="clientDob">Date of Birth</label><input id="clientDob" name="clientDob" type="date" /></div>
+      <div><label for="clientDob">Date of Birth</label><input id="clientDob" name="clientDob" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." /></div>
       <div>
         <label for="clientDlLast3">Last 3 Digits of Driver License *</label>
         <input id="clientDlLast3" name="clientDlLast3" inputmode="numeric" pattern="[0-9]{3}" maxlength="3" title="Enter exactly 3 digits." required />
@@ -133,8 +133,8 @@
       <div><label for="employerPhone">Employer Phone</label><input id="employerPhone" name="employerPhone" /></div>
       <div class="full"><label for="employerAddress">Employer Address</label><input id="employerAddress" name="employerAddress" /></div>
       <div><label for="monthlyIncome">Monthly Income</label><input id="monthlyIncome" name="monthlyIncome" type="number" step="0.01" /></div>
-      <div><label for="dateOfMarriage">Date of Marriage</label><input id="dateOfMarriage" name="dateOfMarriage" type="date" /></div>
-      <div><label for="dateCeasedLivingTogether">Date ceased to live together</label><input id="dateCeasedLivingTogether" name="dateCeasedLivingTogether" type="date" /></div>
+      <div><label for="dateOfMarriage">Date of Marriage</label><input id="dateOfMarriage" name="dateOfMarriage" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." /></div>
+      <div><label for="dateCeasedLivingTogether">Date ceased to live together</label><input id="dateCeasedLivingTogether" name="dateCeasedLivingTogether" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." /></div>
       <div><label for="marriageCityState">City and State of Marriage</label><input id="marriageCityState" name="marriageCityState" /></div>
       <div><label for="maidenName">Maiden Name</label><input id="maidenName" name="maidenName" /></div>
     </div></fieldset>
@@ -143,7 +143,7 @@
       <div><label for="spouseName">Full Name</label><input id="spouseName" name="spouseName" /></div>
       <div><label for="spouseCounty">County</label><input id="spouseCounty" name="spouseCounty" /></div>
       <div class="full"><label for="spouseAddress">Address</label><input id="spouseAddress" name="spouseAddress" /></div>
-      <div><label for="spouseDob">Date of Birth</label><input id="spouseDob" name="spouseDob" type="date" /></div>
+      <div><label for="spouseDob">Date of Birth</label><input id="spouseDob" name="spouseDob" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." /></div>
       <div><label for="spouseDlLast3">Last 3 Digits of Driver License</label><input id="spouseDlLast3" name="spouseDlLast3" maxlength="3" /></div>
       <div><label for="spouseSsnLast3">Last 3 Digits of SSN</label><input id="spouseSsnLast3" name="spouseSsnLast3" maxlength="3" /></div>
       <div><label for="spousePhone">Phone</label><input id="spousePhone" name="spousePhone" /></div>
@@ -204,7 +204,7 @@
         <input id="typedSignature" name="typedSignature" autocomplete="name" autocapitalize="words" autocorrect="off" spellcheck="false" />
         <div id="typedSignaturePreview" class="typed-signature-preview empty">Typed signature preview</div>
       </div>
-      <div class="grid"><div><label for="signatureDate">Signature Date *</label><input id="signatureDate" name="signatureDate" type="date" required /></div></div>
+      <div class="grid"><div><label for="signatureDate">Signature Date *</label><input id="signatureDate" name="signatureDate" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." required /></div></div>
     </fieldset>
     <div class="actions"><button type="submit">Submit Online Form</button></div>
     <div id="formStatus" class="status"></div>
@@ -246,6 +246,35 @@
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+  function formatDateForDisplay(date){
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${month}/${day}/${date.getFullYear()}`;
+  }
+  function expandTwoDigitYear(value){
+    const year = Number.parseInt(value, 10);
+    return String(year >= 30 ? 1900 + year : 2000 + year);
+  }
+  function normalizeTypedDate(value){
+    const trimmed = String(value || '').trim();
+    if(!trimmed) return '';
+    const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
+    if(slashMatch) {
+      const month = slashMatch[1].padStart(2, '0');
+      const day = slashMatch[2].padStart(2, '0');
+      const year = slashMatch[3].length === 2 ? expandTwoDigitYear(slashMatch[3]) : slashMatch[3];
+      return `${month}/${day}/${year}`;
+    }
+    const digits = trimmed.replace(/\D/g, '');
+    if(digits.length === 8) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    if(digits.length === 7) return `${digits.slice(0, 1).padStart(2, '0')}/${digits.slice(1, 3)}/${digits.slice(3)}`;
+    if(digits.length === 6) return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${expandTwoDigitYear(digits.slice(4))}`;
+    return trimmed;
+  }
+  function bindDateInput(input){
+    input.addEventListener('blur', () => { input.value = normalizeTypedDate(input.value); });
+  }
+  document.querySelectorAll('[data-date-input]').forEach(bindDateInput);
   function bindRequiredLast3Field(inputId, checkboxId){
     const input = byId(inputId);
     const checkbox = byId(checkboxId);
@@ -323,9 +352,10 @@
       </div>
       <div class="grid">
         <div><label for="child${n}Name">Child ${n} Name</label><input id="child${n}Name" name="child${n}Name" value="${escapeHtml(name)}" /></div>
-        <div><label for="child${n}Dob">Child ${n} Date of Birth</label><input id="child${n}Dob" name="child${n}Dob" type="date" value="${escapeHtml(dob)}" /></div>
+        <div><label for="child${n}Dob">Child ${n} Date of Birth</label><input id="child${n}Dob" name="child${n}Dob" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." value="${escapeHtml(dob)}" /></div>
       </div>`;
     entry.querySelector('.remove-child').addEventListener('click', () => { entry.remove(); renumberChildren(); });
+    bindDateInput(entry.querySelector('input[name$="Dob"]'));
     childrenContainer.appendChild(entry);
   }
   function escapeHtml(s){ return String(s || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
@@ -435,8 +465,8 @@
   typedSignature.addEventListener('input', updateTypedSignaturePreview);
   updateTypedSignaturePreview();
 
-  byId('date').valueAsDate = new Date();
-  byId('signatureDate').valueAsDate = new Date();
+  byId('date').value = formatDateForDisplay(new Date());
+  byId('signatureDate').value = formatDateForDisplay(new Date());
 
   byId('intakeForm').addEventListener('submit', async e => {
     e.preventDefault();
@@ -465,7 +495,7 @@
       const result = await res.json();
       if(result.downloadContentBase64) downloadBase64File(result.downloadContentBase64, result.downloadFileName, result.downloadContentType);
       setStatus(byId('formStatus'), result.automationForwarded ? 'Submitted successfully. The completed Word document has downloaded.' : 'Completed Word document downloaded. Power Automate is not connected yet.', true);
-      e.target.reset(); syncClientDlLast3(); syncClientSsnLast3(); childrenContainer.innerHTML = ''; childCount = 0; for(let i = 0; i < 4; i += 1) addChild(); resetSignature(); byId('date').valueAsDate = new Date(); byId('signatureDate').valueAsDate = new Date();
+      e.target.reset(); syncClientDlLast3(); syncClientSsnLast3(); childrenContainer.innerHTML = ''; childCount = 0; for(let i = 0; i < 4; i += 1) addChild(); resetSignature(); byId('date').value = formatDateForDisplay(new Date()); byId('signatureDate').value = formatDateForDisplay(new Date());
     } catch(err) { setStatus(byId('formStatus'), err.message); }
   });
 </script>
