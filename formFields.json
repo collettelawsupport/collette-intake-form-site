@@ -21,6 +21,13 @@
     "templateKey": "clientAddress"
   },
   {
+    "id": "clientCity",
+    "label": "City",
+    "type": "text",
+    "required": true,
+    "templateKey": "clientCity"
+  },
+  {
     "id": "clientState",
     "label": "State",
     "type": "text",

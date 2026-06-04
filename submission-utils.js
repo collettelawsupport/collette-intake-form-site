@@ -48,6 +48,7 @@ async function createOnlinePayload(body) {
     'date',
     'clientName',
     'clientAddress',
+    'clientCity',
     'clientState',
     'clientZip',
     'clientPhone',

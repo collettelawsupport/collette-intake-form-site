@@ -123,6 +123,10 @@ The Power Automate payload also includes:
 ```json
 {
   "submissionType": "online_form",
+  "clientAddress": "123 Main St",
+  "clientCity": "Dallas",
+  "clientState": "TX",
+  "clientZip": "75001",
   "clientDlLast3": "123",
   "clientNoDriversLicense": false,
   "clientSsnLast3": "456",
