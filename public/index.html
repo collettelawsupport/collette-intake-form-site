@@ -34,6 +34,9 @@
     .checks input { width:auto; }
     .inline-check { display:flex; align-items:center; gap:8px; margin-top:8px; margin-bottom:0; font-weight:400; color:#52606d; }
     .inline-check input { width:auto; }
+    .option-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .option-row label { display:flex; align-items:center; gap:8px; margin:0; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:#fbfdff; cursor:pointer; font-weight:400; }
+    .option-row input { width:auto; }
     .signature-pad { border:1px solid var(--border); border-radius:10px; width:100%; height:170px; background:#fff; touch-action:none; }
     .signature-methods { display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; }
     .signature-methods label { display:flex; align-items:center; gap:8px; margin:0; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:#fbfdff; cursor:pointer; }
@@ -336,12 +339,13 @@
   });
 
 
-  // Children: dynamic add/remove. Power Automate receives child1Name/child1Dob through childNName/childNDob, plus children[] and childrenText.
+  // Children: dynamic add/remove. Power Automate receives child1Name/child1Dob/child1Sex through childNName/childNDob/childNSex, plus children[] and childrenText.
   const childrenContainer = byId('childrenContainer');
   let childCount = 0;
-  function addChild(name = '', dob = '') {
+  function addChild(name = '', dob = '', sex = '') {
     childCount += 1;
     const n = childCount;
+    const selectedSex = String(sex || '').toLowerCase();
     const entry = document.createElement('div');
     entry.className = 'child-entry';
     entry.dataset.childNumber = String(n);
@@ -353,8 +357,16 @@
       <div class="grid">
         <div><label for="child${n}Name">Child ${n} Name</label><input id="child${n}Name" name="child${n}Name" value="${escapeHtml(name)}" /></div>
         <div><label for="child${n}Dob">Child ${n} Date of Birth</label><input id="child${n}Dob" name="child${n}Dob" type="text" class="date-text" data-date-input placeholder="MM/DD/YYYY" title="Use MM/DD/YYYY." value="${escapeHtml(dob)}" /></div>
+        <div class="full">
+          <label>Child ${n} Sex</label>
+          <div class="option-row">
+            <label for="child${n}SexMale"><input id="child${n}SexMale" name="child${n}Sex" type="checkbox" value="Male" data-child-sex ${selectedSex === 'male' ? 'checked' : ''} /> Male</label>
+            <label for="child${n}SexFemale"><input id="child${n}SexFemale" name="child${n}Sex" type="checkbox" value="Female" data-child-sex ${selectedSex === 'female' ? 'checked' : ''} /> Female</label>
+          </div>
+        </div>
       </div>`;
     entry.querySelector('.remove-child').addEventListener('click', () => { entry.remove(); renumberChildren(); });
+    bindChildSexInputs(entry);
     bindDateInput(entry.querySelector('input[name$="Dob"]'));
     childrenContainer.appendChild(entry);
   }
@@ -370,10 +382,20 @@
       const dobInput = entry.querySelector('input[name$="Dob"]');
       const nameLabel = entry.querySelector('label[for$="Name"]');
       const dobLabel = entry.querySelector('label[for$="Dob"]');
+      const sexLabel = entry.querySelector('.option-row').previousElementSibling;
+      const sexMaleInput = entry.querySelector('input[value="Male"]');
+      const sexFemaleInput = entry.querySelector('input[value="Female"]');
+      const sexMaleLabel = entry.querySelector(`label[for="${sexMaleInput.id}"]`);
+      const sexFemaleLabel = entry.querySelector(`label[for="${sexFemaleInput.id}"]`);
       nameInput.id = nameInput.name = `child${n}Name`;
       dobInput.id = dobInput.name = `child${n}Dob`;
+      sexMaleInput.id = `child${n}SexMale`; sexMaleInput.name = `child${n}Sex`;
+      sexFemaleInput.id = `child${n}SexFemale`; sexFemaleInput.name = `child${n}Sex`;
       nameLabel.htmlFor = `child${n}Name`; nameLabel.textContent = `Child ${n} Name`;
       dobLabel.htmlFor = `child${n}Dob`; dobLabel.textContent = `Child ${n} Date of Birth`;
+      sexLabel.textContent = `Child ${n} Sex`;
+      sexMaleLabel.htmlFor = `child${n}SexMale`;
+      sexFemaleLabel.htmlFor = `child${n}SexFemale`;
       entry.querySelector('.remove-child').setAttribute('aria-label', `Remove child ${n}`);
     });
   }
@@ -383,9 +405,26 @@
       const n = idx + 1;
       const name = (fd.get(`child${n}Name`) || '').toString().trim();
       const dob = (fd.get(`child${n}Dob`) || '').toString().trim();
-      if(name || dob) children.push({ name, dateOfBirth: dob });
+      const selectedSexes = fd.getAll(`child${n}Sex`).map(value => value.toString().trim()).filter(Boolean);
+      if(selectedSexes.length > 1) throw new Error(`Please select only one sex for Child ${n}.`);
+      const sex = selectedSexes[0] || '';
+      if((name || dob) && !sex) throw new Error(`Please select Male or Female for Child ${n}.`);
+      if(name || dob) children.push({ name, dateOfBirth: dob, sex });
     });
     return children;
+  }
+  function bindChildSexInputs(entry){
+    entry.querySelectorAll('input[data-child-sex]').forEach(input => {
+      input.addEventListener('change', () => {
+        if(!input.checked) return;
+        entry.querySelectorAll('input[data-child-sex]').forEach(other => {
+          if(other !== input) other.checked = false;
+        });
+      });
+    });
+  }
+  function formatChildrenText(children){
+    return children.length ? children.map((child, i) => `Child ${i + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'} - Sex: ${child.sex || 'Sex not provided'}`).join('\n') : '';
   }
   document.querySelectorAll('.add-child-button').forEach(button => {
     button.addEventListener('click', () => addChild());
@@ -472,23 +511,23 @@
     e.preventDefault();
     const signature = currentSignatureDataUrl();
     if(!signature){ setStatus(byId('formStatus'), 'Please draw or type your signature before submitting.'); return; }
-    const fd = new FormData(e.target);
-    const data = Object.fromEntries(fd.entries());
-    data.caseTypes = fd.getAll('caseTypes');
-    data.children = collectChildren(fd);
-    data.childrenText = data.children.length ? data.children.map((child, i) => `Child ${i + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'}`).join('\n') : '';
-    data.submissionType = 'online_form';
-    data.signature = signature;
-    data.clientNoDriversLicense = byId('clientNoDriversLicense').checked;
-    data.clientNoSsn = byId('clientNoSsn').checked;
-    data.timestamp = new Date().toISOString();
-    const client = sanitizeFilePart(data.clientName);
-    const matter = sanitizeFilePart((data.caseTypes && data.caseTypes[0]) || 'Intake');
-    data.clientNameForFile = client;
-    data.matterTypeForFile = matter;
-    data.generatedDocxFileName = `${client}_${matter}_Completed_Form.docx`;
-    data.generatedPdfFileName = `${client}_${matter}_Completed_Form.pdf`;
     try {
+      const fd = new FormData(e.target);
+      const data = Object.fromEntries(fd.entries());
+      data.caseTypes = fd.getAll('caseTypes');
+      data.children = collectChildren(fd);
+      data.childrenText = formatChildrenText(data.children);
+      data.submissionType = 'online_form';
+      data.signature = signature;
+      data.clientNoDriversLicense = byId('clientNoDriversLicense').checked;
+      data.clientNoSsn = byId('clientNoSsn').checked;
+      data.timestamp = new Date().toISOString();
+      const client = sanitizeFilePart(data.clientName);
+      const matter = sanitizeFilePart((data.caseTypes && data.caseTypes[0]) || 'Intake');
+      data.clientNameForFile = client;
+      data.matterTypeForFile = matter;
+      data.generatedDocxFileName = `${client}_${matter}_Completed_Form.docx`;
+      data.generatedPdfFileName = `${client}_${matter}_Completed_Form.pdf`;
       setStatus(byId('formStatus'), 'Submitting...', true);
       const res = await fetch(API_ENDPOINTS.online, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
       if(!res.ok) throw new Error(await readResponseMessage(res, 'Submission failed with status ' + res.status));

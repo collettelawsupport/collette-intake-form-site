@@ -35,10 +35,11 @@
     "children": [
       {
         "name": "Jane Doe",
-        "dateOfBirth": "2015-04-10"
+        "dateOfBirth": "2015-04-10",
+        "sex": "Female"
       }
     ],
-    "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10",
+    "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10 - Sex: Female",
     "documentGeneration": {
       "action": "website_generated_docx",
       "templateFileName": "ClientIntakeForm_Automation_Template.docx",
@@ -55,7 +56,7 @@
         "clientSsnLast3": "456",
         "clientNoSsn": false,
         "caseTypesText": "Estate Planning",
-        "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10",
+        "childrenText": "Child 1: Jane Doe - DOB: 2015-04-10 - Sex: Female",
         "signatureMethod": "type",
         "typedSignature": "Jane Client",
         "signature": "data:image/png;base64,..."

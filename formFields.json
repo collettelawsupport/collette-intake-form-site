@@ -257,9 +257,19 @@
         "label": "Child Date of Birth",
         "type": "text",
         "required": false
+      },
+      {
+        "id": "sex",
+        "label": "Child Sex",
+        "type": "checkbox-group",
+        "requiredWhenChildListed": true,
+        "options": [
+          "Male",
+          "Female"
+        ]
       }
     ],
-    "payloadNotes": "The HTML also sends child1Name/child1Dob through childNName/childNDob for compatibility, plus children[] and childrenText for document generation."
+    "payloadNotes": "The HTML also sends child1Name/child1Dob/child1Sex through childNName/childNDob/childNSex for compatibility, plus children[] and childrenText for document generation. Child sex is required when a child name or date of birth is provided."
   },
   {
     "id": "caseTypes",

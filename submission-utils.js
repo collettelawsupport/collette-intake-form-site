@@ -478,25 +478,46 @@ function normalizeCaseTypes(value) {
 function normalizeChildren(childrenValue, body) {
   if (Array.isArray(childrenValue)) {
     return childrenValue
-      .map((child) => ({
-        name: String(child && child.name ? child.name : '').trim(),
-        dateOfBirth: String(child && child.dateOfBirth ? child.dateOfBirth : '').trim(),
-      }))
-      .filter((child) => child.name || child.dateOfBirth);
+      .map((child, index) => normalizeChildRecord({
+        name: child && child.name,
+        dateOfBirth: child && child.dateOfBirth,
+        sex: child && (child.sex || child.gender),
+      }, index + 1))
+      .filter(Boolean);
   }
 
   const children = [];
   for (let index = 1; index <= 50; index += 1) {
-    const name = String(body[`child${index}Name`] || '').trim();
-    const dateOfBirth = String(body[`child${index}Dob`] || '').trim();
-    if (name || dateOfBirth) children.push({ name, dateOfBirth });
+    const child = normalizeChildRecord({
+      name: body[`child${index}Name`],
+      dateOfBirth: body[`child${index}Dob`],
+      sex: body[`child${index}Sex`] || body[`child${index}Gender`],
+    }, index);
+    if (child) children.push(child);
   }
   return children;
 }
 
+function normalizeChildRecord(child, index) {
+  const name = String(child.name || '').trim();
+  const dateOfBirth = String(child.dateOfBirth || '').trim();
+  const sex = normalizeChildSex(child.sex);
+  if (!name && !dateOfBirth) return null;
+  if (!sex) throw new HttpError(400, `Sex is required for Child ${index} when a child name or date of birth is provided.`);
+  return { name, dateOfBirth, sex };
+}
+
+function normalizeChildSex(value) {
+  const cleaned = String(value || '').trim().toLowerCase();
+  if (cleaned === 'male') return 'Male';
+  if (cleaned === 'female') return 'Female';
+  if (cleaned) throw new HttpError(400, 'Child sex must be Male or Female.');
+  return '';
+}
+
 function buildChildrenText(children) {
   return children.length
-    ? children.map((child, index) => `Child ${index + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'}`).join('\n')
+    ? children.map((child, index) => `Child ${index + 1}: ${child.name || 'Name not provided'} - DOB: ${child.dateOfBirth || 'DOB not provided'} - Sex: ${child.sex || 'Sex not provided'}`).join('\n')
     : '';
 }
 
