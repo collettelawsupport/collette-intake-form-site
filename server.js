@@ -77,6 +77,7 @@ async function handleOnlineSubmission(req, res) {
   const body = await readJson(req, MAX_JSON_BODY_BYTES);
   const payload = await submissionUtils.createOnlinePayload(body);
   const webhookResult = await submissionUtils.postToPowerAutomate(payload, { required: false });
+  await submissionUtils.postToForge(payload);
   sendJson(res, 200, {
     ok: true,
     message: webhookResult.skipped
@@ -150,6 +151,7 @@ async function handleManualUpload(req, res) {
   };
 
   const webhookResult = await postToPowerAutomate(payload);
+  await submissionUtils.postToForge(payload);
   sendJson(res, 200, {
     ok: true,
     message: 'Manual upload submitted successfully.',
