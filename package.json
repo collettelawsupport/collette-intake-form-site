@@ -10,6 +10,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check server.js"
+    "check": "node --check server.js",
+    "test": "node --test",
+    "capture:forge": "node scripts/capture-forge-request.js fixtures"
   }
 }
