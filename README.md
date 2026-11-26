@@ -82,6 +82,15 @@ Set these in Netlify's environment variable UI, CLI, or API. Do not put the real
 - `MAX_JSON_BODY_BYTES` - optional. Defaults to `31457280` bytes.
 - `POWER_AUTOMATE_TIMEOUT_MS` - optional. Defaults to `20000`.
 - `INCLUDE_TEMPLATE_BASE64` - optional. Usually leave this unset. Set to `true` only if you want the original automation template included in the online submission payload for troubleshooting.
+- `FORGE_INTAKE_WEBHOOK_URL` - optional. Forge Ledger's intake endpoint: on staging `https://forge-ledger-staging.onrender.com/api/v1/crm/intake-submissions`, later `https://app.collette.law/api/v1/crm/intake-submissions`. When set, every online submission and manual upload is also sent there, with the same JSON as Power Automate, after the Power Automate step. Leave it unset and nothing is sent to Forge.
+- `FORGE_INTAKE_WEBHOOK_SECRET` - required with `FORGE_INTAKE_WEBHOOK_URL`. Sent as `Authorization: Bearer <secret>`; it must match the secret set on Forge. Without it, nothing is sent to Forge.
+- `FORGE_INTAKE_TIMEOUT_MS` - optional. Defaults to `5000`; kept short because it adds to the submission time when Forge is slow, inside the Netlify function time limit.
+
+Forge is a second destination, not a replacement: Power Automate keeps receiving every submission exactly as before. A failure to reach Forge (not configured, down, slow, or refusing the secret) is written to the function log, without the submission's content, and never fails the submission or changes the response the browser receives.
+
+Forge is tried only after the Power Automate step succeeds: if Power Automate refuses a submission, the browser is told and Forge is not sent it, so the two never disagree about what was accepted.
+
+`npm test` runs the Forge destination's tests with Node's own test runner (no dependency). `npm run capture:forge` runs the two functions on fictional answers against a local server and writes the exact request each sends to Forge to `fixtures/` (gzipped JSON, signed with a test secret); Forge Ledger's integration test replays those files through its whole intake path.
 
 ## Local Setup
 

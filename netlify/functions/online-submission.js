@@ -3,6 +3,7 @@ const {
   errorResponse,
   jsonResponse,
   parseJsonBody,
+  postToForge,
   postToPowerAutomate,
 } = require('../../submission-utils');
 
@@ -16,6 +17,7 @@ exports.handler = async (event) => {
     const body = parseJsonBody(event.body, event.isBase64Encoded);
     const payload = await createOnlinePayload(body);
     const webhookResult = await postToPowerAutomate(payload, { required: false });
+    await postToForge(payload);
 
     return jsonResponse(200, {
       ok: true,

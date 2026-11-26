@@ -213,6 +213,43 @@ async function postToPowerAutomate(payload, options = {}) {
   }
 }
 
+// Forge Ledger's intake CRM is a second destination for the same payload, sent after Power
+// Automate. It is optional (no URL, no send) and never fails a submission: any error is logged,
+// without the payload, and the submitter still gets their answer from the Power Automate step.
+async function postToForge(payload) {
+  const url = process.env.FORGE_INTAKE_WEBHOOK_URL || '';
+  const secret = process.env.FORGE_INTAKE_WEBHOOK_SECRET || '';
+  if (!url) return { status: null, skipped: true };
+  if (!secret) {
+    console.warn('Forge intake webhook skipped: FORGE_INTAKE_WEBHOOK_SECRET is not set.');
+    return { status: null, skipped: true };
+  }
+
+  const timeoutMs = Number.parseInt(process.env.FORGE_INTAKE_TIMEOUT_MS || '5000', 10);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    await response.text();
+    if (!response.ok) {
+      console.error(`Forge intake webhook returned HTTP ${response.status} for a ${payload.submissionType} submission.`);
+    }
+    return { status: response.status, skipped: false };
+  } catch (error) {
+    const reason = error.name === 'AbortError' ? `timed out after ${timeoutMs} ms` : error.message;
+    console.error(`Forge intake webhook failed for a ${payload.submissionType} submission: ${reason}`);
+    return { status: null, skipped: false };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function jsonResponse(statusCode, payload) {
   return {
     statusCode,
@@ -583,5 +620,6 @@ module.exports = {
   errorResponse,
   jsonResponse,
   parseJsonBody,
+  postToForge,
   postToPowerAutomate,
 };
